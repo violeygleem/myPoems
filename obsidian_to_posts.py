@@ -1,15 +1,10 @@
 import shutil
 from pathlib import Path
 
-# ---------------------------
-# 源文件夹列表
-# ---------------------------
-SOURCE_ROOT = Path(r"F:\work\write\obsidian vault\pages\001_作品(out)\1_写")
-
-# ---------------------------
-# 目标 POSTS 目录
-# ---------------------------
-POSTS_DIR = Path(r"F:\work\write\obsidian vault\pages\posts")
+# 确保这个路径指向你 D 盘的新位置
+SOURCE_ROOT = Path(r"D:\work\write\obsidian vault\pages\001_作品(out)\1_写")
+# 目标 posts 目录（如果也在 D 盘请同步修改）
+POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
 
 # --- 新增：清理旧的 posts 数据，确保同步 ---
 if POSTS_DIR.exists():

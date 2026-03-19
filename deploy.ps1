@@ -2,8 +2,8 @@
 # 一键 Hugo 部署脚本 (PowerShell 优化版)
 # -----------------------------
 
-$RepoPath   = "F:/tools/web/myweb/bookblog"
-$RemoteURL  = "git@github.com:fjhskfs415263/myPoems.git"
+$RepoPath   = "D:\code_web\bookblog"
+$RemoteURL = "git@github.com:VioleyGleem/myPoems.git"  # 已更新为你的新 ID
 $BranchName = "gh-pages"
 
 Write-Host "===============================" -ForegroundColor Cyan

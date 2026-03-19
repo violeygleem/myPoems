@@ -7,10 +7,10 @@ from datetime import datetime
 # ---------------------------
 # 配置路径 (请确保与你的实际环境一致)
 # ---------------------------
-POSTS_DIR = Path(r"F:\work\write\obsidian vault\pages\posts")
-ATTACHMENTS_DIR = Path(r"F:\work\write\obsidian vault\Attachments")
-HUGO_CONTENT_DIR = Path(r"F:\tools\web\myweb\bookblog\content\docs")
-STATIC_IMAGES_DIR = Path(r"F:\tools\web\myweb\bookblog\static\images")
+POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
+ATTACHMENTS_DIR = Path(r"D:\work\write\obsidian vault\Attachments")
+HUGO_CONTENT_DIR = Path(r"D:\tools\web\myweb\bookblog\content\docs")
+STATIC_IMAGES_DIR = Path(r"D:\tools\web\myweb\bookblog\static\images")
 
 # 自动生成版权年份区间
 START_YEAR = 2025
