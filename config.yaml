@@ -3,7 +3,7 @@ title : "my poems"
 date: 2025-09-30
 author: "Violey Gleem"
 draft: false
-baseURL : "https://fjhskfs415263.github.io/myPoems/"
+baseURL = "https://VioleyGleem.github.io/myPoems/"
 languageCode : "en-us"
 theme : "hugo-book"
 ---

@@ -71,14 +71,14 @@ def update_front_matter(front_matter, title, date_str=None):
     return "\n".join(fm_new_lines)
 
 def copy_images_and_update_paths(md_content):
-    """处理图片引用，将 Obsidian 链接转为 Hugo 静态链接"""
     def repl_md(match):
         img_name = Path(match.group(1)).name
         src = ATTACHMENTS_DIR / img_name
         if src.exists():
             shutil.copy2(src, STATIC_IMAGES_DIR / img_name)
-        return f"![](/images/{img_name.replace(' ','%20')})"
-    
+        # 去掉开头的斜杠，改为相对路径，或者直接适配你的二级目录
+        return f"![](../../images/{img_name.replace(' ','%20')})" 
+
     md_content = re.sub(r"!\[.*?\]\((.*?)\)", repl_md, md_content)
     md_content = re.sub(r"!\[\[(.*?)\]\]", repl_md, md_content)
     return md_content
