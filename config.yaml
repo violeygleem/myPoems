@@ -1,9 +1,0 @@
-title: "my poems"
-date: 2025-09-30
-author: "Violey Gleem"
-draft: false
-baseURL: "https://VioleyGleem.github.io/myPoems/"
-relativeURLs: true
-canonifyURLs: false
-languageCode: "en-us"
-theme: "hugo-book"
