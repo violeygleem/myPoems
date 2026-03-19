@@ -36,7 +36,7 @@ Is there another Troy for you to burn?
 
 
 
-![](/images/wilderness%20lessons-Recovered-Recovered.png)
+![](../../images/wilderness%20lessons-Recovered-Recovered.png)
 ---
 以前的版本: 没在前文加焚毁的城池
 Hunger taught me no lesson,

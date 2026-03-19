@@ -23,6 +23,6 @@ for what I am shall be done
 no more sorrow,
 I'll come home
 like a lost child finding their mom.
-![](/images/children%20of%20lir.png)
+![](../../images/children%20of%20lir.png)
 
 © 2025-2026 [Violey Gleem]. Licensed under CC BY-NC-ND 4.0

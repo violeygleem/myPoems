@@ -38,6 +38,6 @@ For now, wipe your tears;
 Touch sweetness to your tongue;
 Come back where you belong.
 
-![](/images/come%20back%20where%20you%20belong.png)
+![](../../images/come%20back%20where%20you%20belong.png)
 
 © 2025-2026 [Violey Gleem]. Licensed under CC BY-NC-ND 4.0

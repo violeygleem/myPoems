@@ -21,6 +21,6 @@ when life is in a calm belt
 Me, a boat disintegrating with every leak
 can no longer withstand the water.
 
-![](/images/after%20all%20that%20i've%20been%20through.png)
+![](../../images/after%20all%20that%20i've%20been%20through.png)
 
 © 2025-2026 [Violey Gleem]. Licensed under CC BY-NC-ND 4.0
