@@ -41,62 +41,41 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "⚠️ main 分支推送遇到问题，请检查是否存在冲突。" -ForegroundColor Yellow
 }
 
-# === Step 2: 清理并构建 Hugo 网站 ===
-Write-Host "==> Step 2: 清理旧文件并构建 Hugo" -ForegroundColor Cyan
+# === Step 2: 深度清理并构建 ===
+Write-Host "==> Step 2: 深度清理旧缓存并构建 Hugo" -ForegroundColor Cyan
 $PublicPath = Join-Path $RepoPath "public"
-if (Test-Path $PublicPath) {
-    Remove-Item -Recurse -Force $PublicPath -ErrorAction SilentlyContinue
-}
+$ResourcesPath = Join-Path $RepoPath "resources"
 
-# 只需要执行这一行，不需要重复
-hugo --minify --buildFuture --cleanDestinationDir
+# 彻底删除旧产物，防止搜索索引缓存
+if (Test-Path $PublicPath) { Remove-Item -Recurse -Force $PublicPath }
+if (Test-Path $ResourcesPath) { Remove-Item -Recurse -Force $ResourcesPath }
 
-
+# 执行构建
+hugo --minify --buildFuture
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Hugo 构建失败。" -ForegroundColor Red
     exit 1
 }
 
-# 执行 Hugo 构建
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "❌ Hugo 构建失败，停止部署。" -ForegroundColor Red
-    exit 1
-}
-
-# === Step 3: 部署 gh-pages (发布静态网页) ===
+# === Step 3: 部署 gh-pages ===
 Write-Host "==> Step 3: 推送到 gh-pages 分支" -ForegroundColor Cyan
-if (-not (Test-Path "$RepoPath/public")) {
-    Write-Host "❌ 错误：public 文件夹不存在，构建可能未成功。" -ForegroundColor Red
-    exit 1
-}
+Set-Location $PublicPath
 
-Set-Location "$RepoPath/public"
-
-# 1. 重新初始化编译后的静态仓库
-if (Test-Path ".git") { Remove-Item -Recurse -Force ".git" }
-git init
-git config core.quotepath false
-
-# 2. 准备分支环境
-git checkout -b $BranchName
-git remote add origin $RemoteURL
-# 创建 .nojekyll 确保 GitHub 不会拦截特殊文件夹
+# 创建 .nojekyll (必须在 git add 之前)
 New-Item -Path . -Name ".nojekyll" -ItemType "file" -Force | Out-Null
 
-# 3. 提交静态页面
+# 重新初始化静态仓库
+git init
+git config core.quotepath false
+git checkout -b $BranchName
+
+# 关键：直接强制推送到远程的 gh-pages 分支根目录
 git add .
-$deployMsg = "Deploy site $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
-git commit -m "$deployMsg"
+git commit -m "Deploy site $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 
-# 4. 强制推送静态网页到 gh-pages 分支
-$headExists = git rev-parse --verify HEAD 2>$null
-if ($headExists) {
-    Write-Host "🚀 正在推送静态网页至 GitHub gh-pages..." -ForegroundColor Cyan
-    git push -f origin $BranchName
-} else {
-    Write-Host "❌ 错误：本地没有产生提交记录，请检查内容是否生成。" -ForegroundColor Red
-    exit 1
-}
+Write-Host "🚀 正在强制推送至 GitHub..." -ForegroundColor Cyan
+# 使用强制推送覆盖远程分支
+git push -f $RemoteURL "${BranchName}:${BranchName}"
 
-Write-Host "`n✅ 部署完成！请等待 1-2 分钟查看网页更新。" -ForegroundColor Green
+Write-Host "`n✅ 部署完成！" -ForegroundColor Green
 Set-Location $RepoPath
