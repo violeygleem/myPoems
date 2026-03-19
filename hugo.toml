@@ -1,9 +1,9 @@
-baseURL = "https://VioleyGleem.github.io/myPoems/"
+baseURL = "https://violeygleem.github.io/myPoems/"
 languageCode = "en-us"
 title = "my poems"
 theme = "hugo-book"
-relativeURLs = false
-canonifyURLs = true
+relativeURLs = true
+canonifyURLs = false
 
 # Widgets 配置
 [widgets]
