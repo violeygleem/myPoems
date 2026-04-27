@@ -2,8 +2,8 @@
 # 一键 Hugo 部署脚本 (PowerShell 优化版)
 # -----------------------------
 
-$RepoPath   = "D:\code_web\bookblog"
-$RemoteURL = "git@github.com:violeygleem/myPoems.git"  # 已更新为你的新 ID
+$RepoPath   = "D:\code_web\myblog"
+$RemoteURL = "git@github.com:violeygleem/myblog.git"  # 已更新为你的新 ID
 $BranchName = "gh-pages"
 
 Write-Host "===============================" -ForegroundColor Cyan
@@ -32,6 +32,10 @@ if ($status) {
 # 3. 拉取远程更新 (因为本地已 commit，不再会有 unstaged changes 报错)
 Write-Host "🔄 同步远程仓库..." -ForegroundColor Gray
 git pull origin main --rebase
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "❌ Git rebase failed. Please resolve conflicts."
+    exit 1
+}
 
 # 4. 推送源码到 main
 Write-Host "📤 推送源码到 GitHub..." -ForegroundColor Gray

@@ -2,7 +2,7 @@
 # ---------------------------
 # 进入项目根目录
 # ---------------------------
-Set-Location "D:\code_web\bookblog"
+Set-Location "D:\code_web\myblog"
 
 # ---------------------------
 # 执行 obsidian_to_posts.py

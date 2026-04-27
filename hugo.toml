@@ -1,6 +1,6 @@
-baseURL = "https://violeygleem.github.io/myPoems/"
+baseURL = "https://violeygleem.github.io/myblog/"
 languageCode = "en-us"
-title = "my poems"
+title = "my blogs"
 theme = "hugo-book"
 relativeURLs = false
 canonifyURLs = false

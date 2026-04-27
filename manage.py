@@ -116,10 +116,6 @@ def process_md(md_path: Path, dst_dir: Path):
 def folder_to_category(folder_name: str):
     """【修正】文件夹名到 Hugo 分类的映射"""
     mapping = {
-        "01_poems": "poems", 
-        "02_故事": "stories", 
-        "05_剧本": "plays",  # 对应你的实际文件夹
-        "剧本": "plays", 
         "04_articles": "articles"
     }
     return mapping.get(folder_name, folder_name.lower())
@@ -127,7 +123,7 @@ def folder_to_category(folder_name: str):
 # ---------------------------
 # 3. 批量执行逻辑
 # ---------------------------
-ALLOWED_CATEGORIES = {"poems", "stories", "plays", "articles"}
+ALLOWED_CATEGORIES = {"articles"}
 
 print(f"🚀 Starting to process files from {POSTS_DIR}...")
 
