@@ -9,8 +9,8 @@ from datetime import datetime
 # ---------------------------
 POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
 ATTACHMENTS_DIR = Path(r"D:\work\write\obsidian vault\Attachments")
-HUGO_CONTENT_DIR = Path(r"D:\code_web\bookblog\content\docs")
-STATIC_IMAGES_DIR = Path(r"D:\code_web\bookblog\static\images")
+HUGO_CONTENT_DIR = Path(r"D:\code_web\myblog\content\docs")
+STATIC_IMAGES_DIR = Path(r"D:\code_web\myblog\static\images")
 
 # 自动生成版权年份区间
 START_YEAR = 2025
