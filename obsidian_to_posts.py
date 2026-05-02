@@ -21,6 +21,7 @@ EXCLUDE_KEYWORDS = ["实验"]
 # 文件夹名 → 分类映射
 # ---------------------------
 CATEGORY_MAPPING = {
+    
     "04_articles": "articles"
 }
 
