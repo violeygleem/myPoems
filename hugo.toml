@@ -1,4 +1,4 @@
-baseURL = "https://violeygleem.github.io/myblog/"
+baseURL = "https://violeygleem.github.io/myPoems/"
 languageCode = "en-us"
 title = "my blogs"
 theme = "hugo-book"
