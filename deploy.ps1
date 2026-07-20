@@ -31,7 +31,12 @@ if ($status) {
 
 # 3. 拉取远程更新 (因为本地已 commit，不再会有 unstaged changes 报错)
 Write-Host "🔄 同步远程仓库..." -ForegroundColor Gray
-git pull origin main --rebase
+
+# 修改前：git pull origin main --rebase
+# 修改后：
+Write-Host "🔄 同步远程仓库..." -ForegroundColor Gray
+git pull origin main --no-rebase
+
 if ($LASTEXITCODE -ne 0) {
     Write-Host "❌ Git rebase failed. Please resolve conflicts."
     exit 1
