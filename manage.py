@@ -10,7 +10,7 @@ from datetime import datetime
 POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
 ATTACHMENTS_DIR = Path(r"D:\work\write\obsidian vault\Attachments")
 HUGO_CONTENT_DIR = Path(r"D:\code_web\bookblog\content\docs")
-STATIC_IMAGES_DIR = Path(r"D:\code_web\bookblog\static\images")
+STATIC_IMAGES_DIR = Path(r"D:\code_web\myblog\static\images")
 
 # 自动生成版权年份区间
 START_YEAR = 2025
@@ -116,14 +116,21 @@ def process_md(md_path: Path, dst_dir: Path):
 def folder_to_category(folder_name: str):
     """【修正】文件夹名到 Hugo 分类的映射"""
     mapping = {
-        "04_articles": "articles"
+        "01_poems": "poems",
+        "02_故事": "storys",
+        "05_剧本": "plays",
+        "04_articles": "articles",
+        "poems": "poems",
+        "storys": "storys",
+        "plays": "plays",
+        "articles": "articles"
     }
     return mapping.get(folder_name, folder_name.lower())
 
 # ---------------------------
 # 3. 批量执行逻辑
 # ---------------------------
-ALLOWED_CATEGORIES = {"articles"}
+ALLOWED_CATEGORIES = {"poems", "storys", "plays", "articles"}
 
 print(f"🚀 Starting to process files from {POSTS_DIR}...")
 
