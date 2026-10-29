@@ -1,0 +1,26 @@
+/* 全局文章样式 */
+article {
+    text-align: center;          /* 标题+诗居中 */
+    font-family: "Georgia", serif;
+    font-size: 1.2em;
+    line-height: 1.8;
+}
+
+/* 图片居中 */
+article img {
+    display: block;
+    margin: 1em auto;
+    max-width: 80%;
+}
+
+/* 如果想诗部分左对齐但居中整个段落块 */
+.poem {
+    text-align: left;       /* 或 center 根据喜好 */
+    margin: 0 auto;
+    font-family: "Georgia", serif;
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+h1 {
+    text-align: center;
+}
