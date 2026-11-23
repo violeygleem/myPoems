@@ -1,60 +1,33 @@
+import argparse
+import os
 import re
 import shutil
-import os
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+from load_conf import load_conf, parse_csv, parse_mapping
 
-# ---------------------------
-# 配置路径 (请确保与你的实际环境一致)
-# ---------------------------
-POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
-ATTACHMENTS_DIR = Path(r"D:\work\write\obsidian vault\Attachments")
-HUGO_CONTENT_DIR = Path(r"D:\code_web\bookblog\content\docs")
-STATIC_IMAGES_DIR = Path(r"D:\code_web\myblog\static\images")
 
-# 自动生成版权年份区间
-START_YEAR = 2025
-CURRENT_YEAR = datetime.now().year
-YEAR_RANGE = f"{START_YEAR}-{CURRENT_YEAR}" if CURRENT_YEAR > START_YEAR else str(START_YEAR)
-COPYRIGHT_LINE = f"© {YEAR_RANGE} [Violey Gleem]. Licensed under CC BY-NC-ND 4.0"
-
-# ---------------------------
-# 1. 环境清理
-# ---------------------------
-if HUGO_CONTENT_DIR.exists():
-    print(f"🧹 Cleaning up Hugo content directory: {HUGO_CONTENT_DIR}")
-    shutil.rmtree(HUGO_CONTENT_DIR)
-
-if STATIC_IMAGES_DIR.exists():
-    print(f"🖼️ Cleaning up Hugo static images: {STATIC_IMAGES_DIR}")
-    shutil.rmtree(STATIC_IMAGES_DIR)
-
-HUGO_CONTENT_DIR.mkdir(parents=True, exist_ok=True)
-STATIC_IMAGES_DIR.mkdir(parents=True, exist_ok=True)
-
-# ---------------------------
-# 2. 工具函数
-# ---------------------------
-def parse_front_matter(md_text):
-    """拆分 YAML 元数据和正文"""
+def parse_front_matter(md_text: str) -> tuple[str, str]:
     match = re.match(r"^---\n(.*?)\n---\n(.*)$", md_text, re.S)
     if match:
         return match.group(1), match.group(2)
     return "", md_text
 
-def update_front_matter(front_matter, title, date_str=None):
-    """更新或注入 YAML 字段"""
-    fm_lines = front_matter.split("\n") if front_matter else []
-    fm_dict = {line.split(":",1)[0].strip(): line.split(":",1)[1].strip()
-               for line in fm_lines if ":" in line}
 
-    # 核心字段设置
+def update_front_matter(front_matter: str, title: str, date_str: str | None = None) -> str:
+    fm_lines = front_matter.split("\n") if front_matter else []
+    fm_dict = {
+        line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip()
+        for line in fm_lines
+        if ":" in line
+    }
+
     fm_dict.update({
         "title": title,
         "layout": "single",
         "type": "docs",
         "sidebar": "true",
-        "bookCollapseSection": "true"
+        "bookCollapseSection": "true",
     })
 
     if date_str:
@@ -62,7 +35,6 @@ def update_front_matter(front_matter, title, date_str=None):
 
     fm_new_lines = ["---"]
     for k, v in fm_dict.items():
-        # 针对日期增加引号保护，防止 Hugo 解析出错
         if k == "date":
             fm_new_lines.append(f'{k}: "{v}"')
         else:
@@ -70,105 +42,108 @@ def update_front_matter(front_matter, title, date_str=None):
     fm_new_lines.append("---")
     return "\n".join(fm_new_lines)
 
-def copy_images_and_update_paths(md_content):
-    def repl_md(match):
-        img_name = Path(match.group(1)).name
-        src = ATTACHMENTS_DIR / img_name
-        if src.exists():
-            shutil.copy2(src, STATIC_IMAGES_DIR / img_name)
-        # 去掉开头的斜杠，改为相对路径，或者直接适配你的二级目录
-        return f"![](../../images/{img_name.replace(' ','%20')})" 
 
-    md_content = re.sub(r"!\[.*?\]\((.*?)\)", repl_md, md_content)
-    md_content = re.sub(r"!\[\[(.*?)\]\]", repl_md, md_content)
-    return md_content
+def main(conf_path: str) -> None:
+    cfg = load_conf(conf_path)
 
-def process_md(md_path: Path, dst_dir: Path):
-    """核心处理：读取、日期保底、清理旧版权、写入新文件"""
-    text = md_path.read_text(encoding="utf-8")
-    front, content = parse_front_matter(text)
+    posts_dir = Path(cfg["posts_dir"])
+    attachments_dir = Path(cfg["attachments_dir"])
+    hugo_content_dir = Path(cfg["hugo_content_dir"])
+    static_images_dir = Path(cfg["static_images_dir"])
 
-    # 日期解析逻辑
-    date_str = None
-    date_match = re.search(r"^date:\s*(.+)$", front, re.M)
-    if date_match:
-        raw_date = date_match.group(1).strip().replace('"', '')
-        try:
-            dt = datetime.strptime(raw_date, "%Y-%m-%d %H:%M") if " " in raw_date else datetime.strptime(raw_date, "%Y-%m-%d")
-            date_str = dt.isoformat()
-        except ValueError:
-            date_str = raw_date
-    else:
-        # 【新增】保底日期：取文件最后修改时间
-        mtime = os.path.getmtime(md_path)
-        date_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
+    start_year = int(cfg.get("copyright_start_year", "2025"))
+    holder = cfg.get("copyright_holder", "Violey Gleem")
+    license_name = cfg.get("copyright_license", "CC BY-NC-ND 4.0")
 
-    fm_new = update_front_matter(front, md_path.stem, date_str)
-    content = copy_images_and_update_paths(content)
+    current_year = datetime.now().year
+    year_range = f"{start_year}-{current_year}" if current_year > start_year else str(start_year)
+    copyright_line = f"© {year_range} [{holder}]. Licensed under {license_name}"
 
-    # 【优化】先清除可能存在的旧版权行，避免重复堆叠
-    content = re.sub(r"© \d{4}.*?CC BY-NC-ND 4.0", "", content).strip()
-    content += "\n\n" + COPYRIGHT_LINE
+    allowed_categories = set(parse_csv(cfg.get("allowed_categories")))
+    category_mapping = parse_mapping(cfg.get("category_mapping"))
 
-    dst_file = dst_dir / md_path.name
-    dst_file.write_text(fm_new + "\n" + content, encoding="utf-8")
+    if hugo_content_dir.exists():
+        print(f"🧹 Cleaning up Hugo content directory: {hugo_content_dir}")
+        shutil.rmtree(hugo_content_dir)
 
-def folder_to_category(folder_name: str):
-    """【修正】文件夹名到 Hugo 分类的映射"""
-    mapping = {
-        "01_poems": "poems",
-        "02_故事": "storys",
-        "05_剧本": "plays",
-        "04_articles": "articles",
-        "poems": "poems",
-        "storys": "storys",
-        "plays": "plays",
-        "articles": "articles"
-    }
-    return mapping.get(folder_name, folder_name.lower())
+    if static_images_dir.exists():
+        print(f"🖼️ Cleaning up Hugo static images: {static_images_dir}")
+        shutil.rmtree(static_images_dir)
 
-# ---------------------------
-# 3. 批量执行逻辑
-# ---------------------------
-ALLOWED_CATEGORIES = {"poems", "storys", "plays", "articles"}
+    hugo_content_dir.mkdir(parents=True, exist_ok=True)
+    static_images_dir.mkdir(parents=True, exist_ok=True)
 
-print(f"🚀 Starting to process files from {POSTS_DIR}...")
+    def copy_images_and_update_paths(md_content: str) -> str:
+        def repl_md(match):
+            img_name = Path(match.group(1)).name
+            src = attachments_dir / img_name
+            if src.exists():
+                shutil.copy2(src, static_images_dir / img_name)
+            return f"![](../../images/{img_name.replace(' ', '%20')})"
 
-for md_file in POSTS_DIR.rglob("*.md"):
-    # 跳过已经生成的 _index.md 避免死循环逻辑
-    if md_file.name == "_index.md":
-        continue
+        md_content = re.sub(r"!\[.*?\]\((.*?)\)", repl_md, md_content)
+        md_content = re.sub(r"!\[\[(.*?)\]\]", repl_md, md_content)
+        return md_content
 
-    parent_folder = md_file.parent.name
-    hugo_subdir = folder_to_category(parent_folder)
+    def process_md(md_path: Path, dst_dir: Path) -> None:
+        text = md_path.read_text(encoding="utf-8")
+        front, content = parse_front_matter(text)
 
-    if hugo_subdir not in ALLOWED_CATEGORIES:
-        continue
+        date_str = None
+        date_match = re.search(r"^date:\s*(.+)$", front, re.M)
+        if date_match:
+            raw_date = date_match.group(1).strip().replace('"', "")
+            try:
+                dt = (
+                    datetime.strptime(raw_date, "%Y-%m-%d %H:%M")
+                    if " " in raw_date
+                    else datetime.strptime(raw_date, "%Y-%m-%d")
+                )
+                date_str = dt.isoformat()
+            except ValueError:
+                date_str = raw_date
+        else:
+            mtime = os.path.getmtime(md_path)
+            date_str = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d")
 
-    hugo_target_dir = HUGO_CONTENT_DIR / hugo_subdir
-    hugo_target_dir.mkdir(parents=True, exist_ok=True)
-    process_md(md_file, hugo_target_dir)
+        fm_new = update_front_matter(front, md_path.stem, date_str)
+        content = copy_images_and_update_paths(content)
+        content = re.sub(r"© \d{4}.*?CC BY-NC-ND 4.0", "", content).strip()
+        content += "\n\n" + copyright_line
 
-# ---------------------------
-# 4. 生成侧边栏索引 (_index.md)
-# ---------------------------
-INDEX_TEMPLATE = """---
+        dst_file = dst_dir / md_path.name
+        dst_file.write_text(fm_new + "\n" + content, encoding="utf-8")
+
+    print(f"🚀 Starting to process files from {posts_dir}...")
+    for md_file in posts_dir.rglob("*.md"):
+        if md_file.name == "_index.md":
+            continue
+        hugo_subdir = category_mapping.get(md_file.parent.name, md_file.parent.name.lower())
+        if hugo_subdir not in allowed_categories:
+            continue
+        hugo_target_dir = hugo_content_dir / hugo_subdir
+        hugo_target_dir.mkdir(parents=True, exist_ok=True)
+        process_md(md_file, hugo_target_dir)
+
+    index_template = """---
 title: {title}
 type: docs
 sidebar: true
 bookCollapseSection: true
 ---
 """
+    for category in allowed_categories:
+        cat_dir = hugo_content_dir / category
+        cat_dir.mkdir(parents=True, exist_ok=True)
+        index_file = cat_dir / "_index.md"
+        index_file.write_text(index_template.format(title=category.capitalize()), encoding="utf-8")
+        print(f"📄 Generated/Reset _index.md for {category}")
 
-for category in ALLOWED_CATEGORIES:
-    cat_dir = HUGO_CONTENT_DIR / category
-    cat_dir.mkdir(parents=True, exist_ok=True)
-    index_file = cat_dir / "_index.md"
+    print("\n✨ All posts and Sidebars are refreshed successfully.")
 
-    index_file.write_text(
-        INDEX_TEMPLATE.format(title=category.capitalize()),
-        encoding="utf-8"
-    )
-    print(f"📄 Generated/Reset _index.md for {category}")
 
-print("\n✨ All posts and Sidebars are refreshed successfully.")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="blog.conf", help="Path to .conf file")
+    args = parser.parse_args()
+    main(args.config)

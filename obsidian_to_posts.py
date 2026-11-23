@@ -1,51 +1,40 @@
+import argparse
 import shutil
 from pathlib import Path
+from load_conf import load_conf, parse_csv, parse_mapping
 
-# 确保这个路径指向你 D 盘的新位置
-SOURCE_ROOT = Path(r"D:\work\write\obsidian vault\pages\001_作品(out)\1_写")
-# 目标 posts 目录（如果也在 D 盘请同步修改）
-POSTS_DIR = Path(r"D:\work\write\obsidian vault\pages\posts")
 
-# --- 新增：清理旧的 posts 数据，确保同步 ---
-if POSTS_DIR.exists():
-    print(f"🧹 Cleaning up old files in {POSTS_DIR}...")
-    shutil.rmtree(POSTS_DIR) # 删除整个文件夹
-POSTS_DIR.mkdir(parents=True, exist_ok=True) # 重新创建干净的目录
+def main(conf_path: str) -> None:
+    cfg = load_conf(conf_path)
 
-# ---------------------------
-# 排除规则
-# ---------------------------
-EXCLUDE_KEYWORDS = ["实验"]
+    source_root = Path(cfg["source_root"])
+    posts_dir = Path(cfg["posts_dir"])
+    exclude_keywords = parse_csv(cfg.get("exclude_keywords"))
+    category_mapping = parse_mapping(cfg.get("category_mapping"))
 
-# ---------------------------
-# 文件夹名 → 分类映射
-# ---------------------------
-CATEGORY_MAPPING = {
-    "01_poems":"poems",
-    "02_故事":"storys",
-    "05_剧本":"plays",
-    "04_articles": "articles"
-}
+    if posts_dir.exists():
+        print(f"🧹 Cleaning up old files in {posts_dir}...")
+        shutil.rmtree(posts_dir)
+    posts_dir.mkdir(parents=True, exist_ok=True)
 
-def folder_to_category(folder_name: str):
-    return CATEGORY_MAPPING.get(folder_name)
+    for md_file in source_root.rglob("*.md"):
+        if any(k in md_file.parts or k in md_file.name for k in exclude_keywords):
+            continue
 
-# ---------------------------
-# 遍历源文件夹，拷贝到 POSTS_DIR
-# ---------------------------
-for md_file in SOURCE_ROOT.rglob("*.md"):
-    # 排除实验文件
-    if any(k in md_file.parts or k in md_file.name for k in EXCLUDE_KEYWORDS):
-        continue
+        category = category_mapping.get(md_file.parent.name)
+        if not category:
+            continue
 
-    category = folder_to_category(md_file.parent.name)
-    if category is None:
-        continue
+        dst_dir = posts_dir / category
+        dst_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(md_file, dst_dir / md_file.name)
+        print(f"Copied {md_file.name} to {dst_dir}")
 
-    dst_dir = POSTS_DIR / category
-    dst_dir.mkdir(parents=True, exist_ok=True)
-    dst_path = dst_dir / md_file.name
-    shutil.copy2(md_file, dst_path)
-    print(f"Copied {md_file.name} to {dst_dir}")
+    print("✅ Posts directory is now a clean reflection of your source files.")
 
-print("✅ Posts directory is now a clean reflection of your source files.")
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="blog.conf", help="Path to .conf file")
+    args = parser.parse_args()
+    main(args.config)
